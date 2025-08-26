@@ -17,7 +17,7 @@ export default function ObjectRender({ orbit, ...props }) {
   const [powerOn, setPowerOn] = useState(false);
   let timer;
 
-  // 클릭 시 화면으로 줌인
+  // 맥북 클릭 시 화면으로 줌인
   const zoomToScreen = () => {
     if (!orbit?.current) {
       console.warn("OrbitControls ref not ready");
@@ -28,12 +28,13 @@ export default function ObjectRender({ orbit, ...props }) {
     const target = orbit.current.target;
 
     const screenCenter = new THREE.Vector3(0, 9.6, -14);
-    const distance = 15; // 화면까지 여유 거리 확보
-    const flyPosition = new THREE.Vector3(0, 9.6, 2 + distance); // 이전 2 + distance
+    const distance = 15; // 화면과 카메라 사이 여유 거리
+    const flyPosition = new THREE.Vector3(0, 9.6, 2 + distance); // Z 위치에 distance 더함
 
     moveLookAt(position, flyPosition, target, screenCenter, false, 2, orbit);
   };
 
+  // 맥북 클릭 이벤트
   const zoom = e => {
     e.stopPropagation();
     if (e.eventObject.name !== "macbook-group") return;
@@ -45,22 +46,26 @@ export default function ObjectRender({ orbit, ...props }) {
     }
   };
 
+  // 맥북 외부 클릭 → 원래 위치로 돌아가기
   const missed = () => {
-    if (laptop) {
-      if (timer) return;
-      if (!orbit?.current) return;
+    if (!laptop) return; // 맥북이 켜져있지 않으면 무시
+    if (timer) return;
+    if (!orbit?.current) return;
 
-      const position = camera.position;
-      const fly = new THREE.Vector3(0, 0, 20);
-      const target = orbit.current.target;
-      const lookAt = new THREE.Vector3(0, 0, 0);
+    const position = camera.position;
+    const target = orbit.current.target;
 
-      moveLookAt(position, fly, target, lookAt, true, 2, orbit);
-      timer = setTimeout(() => activeLaptop(false), 2000);
-      setPowerOn(false);
-    }
+    // 원래 카메라 위치와 타겟 (Canvas 초기값)
+    const originalPosition = new THREE.Vector3(0, 0, 40);
+    const originalTarget = new THREE.Vector3(0, 0, 0);
+
+    moveLookAt(position, originalPosition, target, originalTarget, true, 2, orbit);
+
+    timer = setTimeout(() => activeLaptop(false), 2000); // 맥북 off
+    setPowerOn(false);
   };
 
+  // 마우스 포인터 따라 맥북 회전
   useFrame(state => {
     const macbook = macbookGroup.current;
     if (!macbook) return;
