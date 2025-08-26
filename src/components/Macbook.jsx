@@ -1,4 +1,4 @@
-import { useGLTF, Html } from "@react-three/drei";
+import { useGLTF, useTexture } from "@react-three/drei";
 
 const SCREEN_KEY = "FxYJZRjJWVjYwLV";
 const TRACKPAD_KEY = "AUMLEhzRIkXUmsX";
@@ -24,6 +24,9 @@ export default function Macbook({ powerOn }) {
   const { nodes, materials } = useGLTF("/models/glb/macbook.glb");
   const { standard, screen, trackpad } = getGeometryMesh(nodes);
 
+  // 저장된 이미지 불러오기 (예: public/images/screen.jpg)
+  const screenTexture = useTexture("/images/screen/wallpaper.gif");
+
   return (
     <>
       {standard.map(mesh => (
@@ -43,21 +46,7 @@ export default function Macbook({ powerOn }) {
           castShadow
           receiveShadow
         >
-          {powerOn && (
-            <Html
-              rotation={[-0.33, 0, 0]}
-              position={[0, 9.6, -14.168]}
-              distanceFactor={10}
-              transform
-            >
-              <iframe
-                src={`${window.location.origin}/screen`}
-                width={1200}
-                height={800}
-                className="border-none"
-              />
-            </Html>
-          )}
+          {powerOn && <meshBasicMaterial map={screenTexture} toneMapped={false} />}
         </mesh>
       )}
 
